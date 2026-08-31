@@ -86,9 +86,21 @@ class LoanApplication(models.Model):
     # Worked example. Uncomment it when you reach 2.03. A Many2one holds a
     # link to one record in another model. comodel_name says which model, and
     # Odoo stores the other record's database id in a partner_id column.
-    # partner_id = fields.Many2one(
-    #     comodel_name="res.partner", string="Customer", required=True
-    # )
+    partner_id = fields.Many2one(
+        comodel_name="res.partner", string="Customer", required=True
+    )
+
+    user_id = fields.Many2one(
+        comodel_name="res.users", string="Salesperson", default=lambda self: self.env.user,
+    )
+    product_id = fields.Many2one(
+        comodel_name="product.product", string="Motorcycle", default=lambda self: self.env.user,
+    )
+    currency_id = fields.Many2one(
+        comodel_name="res.currency", default=lambda self: self.env.user,
+    )
+    loan_amount = fields.Monetary(currency_field="currency_id")
+    down_payment = fields.Monetary(currency_field="currency_id")
 
     # TODO: user_id — Many2one to "res.users", labelled "Salesperson",
     #       defaulting to whoever is logged in. self.env.user is the current

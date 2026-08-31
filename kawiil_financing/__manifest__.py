@@ -36,7 +36,7 @@
     # TODO (assignment 2.03): this module starts linking to products, so swap
     # this for the "product" module. Drop "base" when you do — product already
     # depends on it, and Odoo installs the whole chain for you.
-    # "depends": ["product"],
+    "depends": ["product"],
     # Odoo Proprietary License, the default for custom customer work.
     "license": "OPL-1",
     # XML and CSV files Odoo loads on install, in the order you list them.
