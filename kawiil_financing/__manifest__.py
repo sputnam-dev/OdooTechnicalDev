@@ -59,7 +59,10 @@
     #     "views/loan_application_tag_views.xml",             2.08
     #     "views/loan_application_document_type_views.xml",   2.08
     #     "views/kawiil_financing_menu.xml",                  2.05
-    "data": [],
+    "data": [
+        "views/loan_application_views.xml",
+        "views/kawiil_financing_menu.xml",
+    ],
     # Sample records, loaded only when a database is created with demo data.
     #
     # TODO: same rule as above — one line per assignment, inserted in order.
@@ -67,7 +70,9 @@
     # tags that already exist:
     #     "demo/config_demo.xml",   2.08
     #     "demo/loan_demo.xml",     2.04
-    "demo": [],
+    "demo": [
+        "demo/loan_demo.xml"
+    ],
     # True gives the module its own top-level menu and makes it show up as an
     # app. False would make it a technical module that only extends others.
     "application": True,
