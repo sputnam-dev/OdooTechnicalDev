@@ -17,14 +17,14 @@
 {
     # The app title in the Apps list. This is the text you search for when you
     # install the module.
-    "name": "TODO",
+    "name": "Loan Management",
     # One line saying what the module does, shown under the title.
-    "summary": "TODO",
+    "summary": "keep track of financing info",
     # Where the app is filed in the Apps list. Odoo splits this on "/", so
     # "Parent/Child" files it under a Child group inside Parent.
-    "category": "TODO",
+    "category": "Custom/Financing",
     # Your full name.
-    "maintainer": "TODO",
+    "maintainer": "SelaYoungPutnam",
     # Where to find this module's source. Leave as is.
     "website": "https://github.com/odoo-trainings/development-masterclass",
     # This module's own version number. Leave as is.
@@ -36,7 +36,7 @@
     # TODO (assignment 2.03): this module starts linking to products, so swap
     # this for the "product" module. Drop "base" when you do — product already
     # depends on it, and Odoo installs the whole chain for you.
-    "depends": ["base"],
+    # "depends": ["product"],
     # Odoo Proprietary License, the default for custom customer work.
     "license": "OPL-1",
     # XML and CSV files Odoo loads on install, in the order you list them.
@@ -52,9 +52,9 @@
     # the views you added at 2.05.
     #
     # The finished list, with the assignment that adds each line:
-    #     "security/kawiil_financing_groups.xml",             2.06
-    #     "security/ir.model.access.csv",                     2.06
-    #     "security/kawiil_financing_security.xml",           2.06
+    #   "security/kawiil_financing_groups.xml",             2.06
+    # "security/ir.model.access.csv",                     2.06
+    #   "security/kawiil_financing_security.xml",           2.06
     #     "views/loan_application_views.xml",                 2.05
     #     "views/loan_application_tag_views.xml",             2.08
     #     "views/loan_application_document_type_views.xml",   2.08
