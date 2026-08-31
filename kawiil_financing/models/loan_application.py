@@ -27,6 +27,24 @@ class LoanApplication(models.Model):
     # off and Odoo derives one from the field name, which would give you "Name"
     # here rather than "Application Number".
     name = fields.Char(string="Application Number")
+    
+    loan_term = fields.Integer(string= "Term (Months)", default=36)
+
+    interest_rate = fields.Float(string ="Interest Rate", required=True, digits=(5,2))
+
+    date_applied = fields.Date(string = "Application Date", default=fields.Date.context_today)
+
+    state = fields.Selection(
+       selection = [
+            ('draft','Draft'),
+            ('sent','Sent'),
+            ('approved','Approved'),
+            ('rejected','Rejected'),
+        ], copy =False, default='draft')
+        
+    
+    active = fields.Boolean(default=True)
+    notes = fields.Html("Internal Notes",copy=False)
 
     # TODO: loan_term — Integer, labelled "Term (Months)", defaulting to 36.
 

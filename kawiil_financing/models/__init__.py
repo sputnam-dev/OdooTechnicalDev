@@ -1,7 +1,7 @@
 # TODO: import each model file so Odoo loads it.
 #
 # Odoo uses one relative import per file, with no .py extension:
-#     from . import <file_name>
+from . import loan_application
 #
 # By assignment 2.08 there are four:
 #     loan_application            the main model            (2.02)
