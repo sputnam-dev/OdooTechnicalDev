@@ -92,9 +92,9 @@
                  stores that record's database id. Never hardcode a number:
                  ids differ from one database to the next. -->
             <field name="partner_id" ref="base.res_partner_3"/>
-            <field name="product_id" ref="product.product_product_4"/>
+            <!-- <field name="product_id" ref="product.product_product_4"/> -->
             <!-- A plain date, written the way the database stores it. -->
-            <field name="date_applied"eval="(DateTime.now() - relativedelta(months=2)).strftime('%Y-%m-%d')"/>
+            <!-- <field name="date_applied"eval="(DateTime.now() - relativedelta(months=2)).strftime('%Y-%m-%d')"/> -->
             <field name="loan_amount">32500.00</field>
             <field name="down_payment">4500.00</field>
             <field name="loan_term">68</field>
