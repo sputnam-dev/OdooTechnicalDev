@@ -4,8 +4,8 @@ from odoo import api, fields, models  # noqa: F401
 # TODO (3.05): write the class declaration. It is the only part of this file you type
 # yourself, because it is the whole mechanism:
 #
-#     class ResPartner(models.Model):
-#         _inherit = "res.partner"
+class ResPartner(models.Model):
+     _inherit = "res.partner"
 #
 # _inherit on its own, with no _name, means "do not declare a new model, add to the
 # one that already exists". No table is created and no data is copied. Everything in
@@ -21,18 +21,19 @@ from odoo import api, fields, models  # noqa: F401
 # sit inside the class, so it drops straight in once your two lines are above it.
 # Read it as you go - the comments in it are the point of the chapter:
 #
-#   loan_application_ids    the reverse of loan.application.partner_id. Archived
-#                           applications drop out on their own, so it holds the
-#                           live requests only.
-#   loan_application_count  what the smart button displays.
-#   phone                   an existing field, adjusted rather than added.
-#   action_view_loan_applications   what the smart button calls.
+      loan_application_ids = fields.One2many(
+          comodel_name="loan.application",
+          inverse_name="partner_id",
+          string="Loan Applications",
+      )
+     loan_application_count = fields.Integer(
+         string="Loan Application Count",
+         compute="_compute_loan_application_count",
+     )
 
-#     loan_application_ids = fields.One2many(
-#         comodel_name="loan.application",
-#         inverse_name="partner_id",
-#         string="Loan Applications",
-#     )
+    phone = fields.Char(help="Best number for questions about a loan application.")
+
+ 
 #
 #     # A distinct label from the One2many above, deliberately. Two fields on one
 #     # model sharing a label makes Odoo warn at startup, and it warns twice here:
@@ -49,22 +50,22 @@ from odoo import api, fields, models  # noqa: F401
 #     # replace that, it adds to it.
 #     phone = fields.Char(help="Best number for questions about a loan application.")
 #
-#     @api.depends("loan_application_ids")
-#     def _compute_loan_application_count(self):
-#         for partner in self:
-#             partner.loan_application_count = len(partner.loan_application_ids)
-#
-#     def action_view_loan_applications(self):
-#         # ensure_one() because a window action can only open one partner's list, and
-#         # self.id on a multi-record set fails much further along.
-#         self.ensure_one()
-#         return {
-#             "type": "ir.actions.act_window",
-#             "name": self.env._("Loan Applications"),
-#             "res_model": "loan.application",
-#             "view_mode": "list,form",
-#             "domain": [("partner_id", "=", self.id)],
-#             # default_partner_id is how Odoo pre-fills a field on a new record: click
-#             # New from the list this opens and the customer is already set.
-#             "context": {"default_partner_id": self.id},
-#         }
+    @api.depends("loan_application_ids")
+    def _compute_loan_application_count(self):
+        for partner in self:
+            partner.loan_application_count = len(partner.loan_application_ids)
+
+    def action_view_loan_applications(self):
+        # ensure_one() because a window action can only open one partner's list, and
+        # self.id on a multi-record set fails much further along.
+        self.ensure_one()
+        return {
+            "type": "ir.actions.act_window",
+            "name": self.env._("Loan Applications"),
+            "res_model": "loan.application",
+            "view_mode": "list,form",
+            "domain": [("partner_id", "=", self.id)],
+            # default_partner_id is how Odoo pre-fills a field on a new record: click
+            # New from the list this opens and the customer is already set.
+            "context": {"default_partner_id": self.id},
+        }

@@ -1,16 +1,16 @@
 # TODO (3.01): the compute method you write below is decorated with
 # @api.depends, so `api` has to join this import.
-from odoo import fields, models
+from odoo import api, fields, models
 
 # TODO (3.02): raising a ValidationError means importing it first:
-#     from odoo.exceptions import ValidationError
+from odoo.exceptions import ValidationError
 
 # TODO (3.03): UserError comes from the same module, so one import line covers
 # both: from odoo.exceptions import UserError, ValidationError
 
 # TODO (3.04): Command joins the odoo import. Mind the order ruff wants —
 # capitals sort first: from odoo import Command, api, fields, models
-
+from odoo import Command
 
 class LoanApplication(models.Model):
     _name = "loan.application"
@@ -88,6 +88,9 @@ class LoanApplication(models.Model):
     partner_id = fields.Many2one(
         comodel_name="res.partner", string="Customer", required=True
     )
+    email =fields.Char(related="partner_id.email",store=True, readonly=True)
+
+    phone = fields.Char(related="partner_id.phone",store=True, readonly=True)
 
     # TODO (3.01): add two related fields that pull the customer's contact details
     # onto this form: `email` from the partner's email, `phone` from the partner's
@@ -125,7 +128,7 @@ class LoanApplication(models.Model):
     # sorted, so COMMANDS.md's search([("loan_amount", ">", 10000)]) snippet stops
     # working and the list view column stops sorting. store=True, or a search=
     # method, brings those back.
-    loan_amount = fields.Monetary(currency_field="currency_id")
+    loan_amount = fields.Monetary(currency_field="currency_id", compute='_compute_loan_amount', inverse="_inverse_loan_amount")
 
     down_payment = fields.Monetary(currency_field="currency_id")
 
@@ -149,8 +152,10 @@ class LoanApplication(models.Model):
     # _compute_loan_amount also needs a decorator, once `api` is imported:
     #     @api.depends("principal_amount", "down_payment")
     # Leave it off and the field is computed once and never refreshed again.
-
+    @api.depends("principal_amount", "down_payment")
     def _compute_loan_amount(self):
+        for record in self:
+            record.loan_amount = record.principal_amount - record.down_payment
         # TODO (3.01): the arithmetic is right, the shape is wrong. This assigns to
         # self, which only works when self holds exactly one record — and a compute
         # method is handed every record that needs the value at once, so as soon as
@@ -161,14 +166,16 @@ class LoanApplication(models.Model):
         # That error is the one you will meet most often in Odoo, and this is what it
         # always means: code written for one record was given several. Wrap the line
         # in `for record in self:` and assign to record instead of self.
-        self.loan_amount = self.principal_amount - self.down_payment
+        
 
     def _inverse_loan_amount(self):
+         for record in self:
+            record.down_payment = record.principal_amount - record.loan_amount
         # TODO (3.01): the same arithmetic rearranged, in the shape you just gave the
         # compute. Odoo calls this on save for the records whose loan_amount was
         # typed in by hand, and principal_amount is the figure that stays put:
         #     down_payment = principal_amount - loan_amount
-        pass
+       
 
     # Optional (3.01) — how to make loan_amount searchable again.
     #
@@ -209,13 +216,19 @@ class LoanApplication(models.Model):
     # so Odoo re-runs it whenever either field is written. Note the difference from
     # the SQL constraints above: this one only fires on writes that go through the
     # ORM, and it can say something specific about what went wrong.
-
+    @api.constrains("principal_amount", "down_payment")
     def _check_down_payment(self):
+        for loan in self:
+            if loan.down_payment >= loan.principal_amount:
+                # We use self.env._() instead of the legacy global _() import
+                raise ValidationError(
+                    self.env._("The down payment cannot be greater than or equal to the principal amount.")
+                )
         # TODO (3.02): loop over self, and raise ValidationError where down_payment
         # is greater than or equal to principal_amount. Wrap the message in
         # self.env._("...") so it can be exported to the translation files — that
         # is the Odoo 19 idiom, and it replaces the older `from odoo import _`.
-        pass
+       
 
     # ---------------------------------------------------------
     # ACTION METHODS
@@ -251,19 +264,56 @@ class LoanApplication(models.Model):
     # TODO (3.03): the other two transitions, following the method above.
 
     def action_reject_loan(self):
+        """Worked example: the reject transition, start to finish."""
+        for loan in self:
+            if loan.state != "rejected":
+                continue
         # TODO (3.03): state to "rejected", date_rejected to today. Same shape as
         # action_approve_loan, including the single write.
-        pass
+        loan.write(
+                {
+                    "state": "rejected",
+                    "date_approved": fields.Date.context_today(loan),
+                }
+            )
 
-    def action_submit(self):
+    def action_submit_loan(self):
+        for loan in self:
+            """Worked example: the reject transition, start to finish."""
+            if loan.state != "draft":
+                continue
+            required_docs = loan.document_ids.filtered(
+                lambda doc: doc._is_required_for_submit()
+            )
+            if not required_docs:
+                raise UserError(
+                    self.env._(
+                        "Attach the required supporting documents before submitting"
+                    )
+                )
+            unapproved = required_docs.filtered(
+                lambda doc: not doc._is_valid_for_submit()
+            )
+            if unapproved:
+                raise UserError(
+                    self.env._(
+                        "Every required document must be approved before the"
+                        "appliction is submitted. '' is not.",
+                        unnapproved[0].type_id.display_name,)
+                )
+                
+            loan.write(
+                {
+                    "state": "sent",
+                    "date_approved": fields.Date.context_today(loan),
+                }
+                    )
         # TODO (3.03): the guard first, the state change second.
         #
         # Ask each line whether it counts, instead of reaching into the document type
         # from here — the document already knows:
         #
-        #     required_docs = loan.document_ids.filtered(
-        #         lambda doc: doc._is_required_for_submit()
-        #     )
+            
         #
         # Refuse with a UserError if there are none at all, and again if any of them
         # fails _is_valid_for_submit(). Wrap both messages in self.env._(), the same
@@ -287,7 +337,7 @@ class LoanApplication(models.Model):
         # On loan, not on self: message_post writes to one record. mail.mt_note is
         # the internal-note subtype, so it lands in the history without emailing the
         # followers — leave it out and everyone following the record gets mail.
-        pass
+        
 
     # ---------------------------------------------------------
     # CRUD OVERRIDES
@@ -312,7 +362,17 @@ class LoanApplication(models.Model):
         # search([]) already leaves out the archived types: the model has an `active`
         # field, and Odoo filters on it unless you tell it otherwise.
         return self.env["loan.application.document.type"].search([])
-
+        
+    @api.model_create_multi    
+    def create(self,vals_list):
+        records = super ().create(vals_list)
+        doc_types = self._get_default_document_types()
+        for vals in vals_list:
+            if doc_types:
+                commands = [Command.create({'type_id': dt.id}) for dt in doc_types]
+                vals['document_ids'] = vals.get('document_ids', []) + commands
+        return records
+        
     # TODO (3.04): then the override itself. It is not stubbed here on purpose: a
     # create() that forgets to return super()'s result breaks every record creation
     # in the module, demo data included, so it is better written whole than left
