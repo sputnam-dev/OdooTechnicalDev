@@ -370,13 +370,12 @@ class LoanApplication(models.Model):
         
     @api.model_create_multi    
     def create(self,vals_list):
-        records = super ().create(vals_list)
         doc_types = self._get_default_document_types()
         for vals in vals_list:
             if doc_types:
                 commands = [Command.create({'type_id': dt.id}) for dt in doc_types]
                 vals['document_ids'] = vals.get('document_ids', []) + commands
-        return records
+        return super().create(vals_list)
         
     # TODO (3.04): then the override itself. It is not stubbed here on purpose: a
     # create() that forgets to return super()'s result breaks every record creation
