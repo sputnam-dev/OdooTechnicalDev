@@ -63,11 +63,11 @@
                             <!-- TODO (3.01): uncomment these two once the related
                                  fields exist on the model. They are commented rather
                                  than written in because a view referring to a field
-                                 that does not exist yet stops the module installing.
+                                 that does not exist yet stops the module installing. -->
 
                             <field name="email"/>
                             <field name="phone"/>
-                            -->
+                           
                             <field name="product_id"/>
                         </group>
                         <group>
