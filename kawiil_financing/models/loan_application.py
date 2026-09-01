@@ -3,7 +3,7 @@
 from odoo import api, fields, models
 
 # TODO (3.02): raising a ValidationError means importing it first:
-from odoo.exceptions import ValidationError
+from odoo.exceptions import ValidationError,UserError
 
 # TODO (3.03): UserError comes from the same module, so one import line covers
 # both: from odoo.exceptions import UserError, ValidationError
