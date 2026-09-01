@@ -1,5 +1,5 @@
 # TODO (3.07): switch the tests on by importing the module beside this one:
-#     from . import test_loan_application
+from . import test_loan_application
 #
 # The tests themselves are already written — read them, then run them. This one line
 # is what makes Odoo see them.
