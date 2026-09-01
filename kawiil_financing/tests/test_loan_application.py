@@ -72,4 +72,4 @@ class TestLoanApplication(TransactionCase):
         # data, while this one raises UserError because it is a rule about what
         # somebody is allowed to do next.
         with self.assertRaises(UserError):
-            loan.action_submit()
+            loan.action_submit_loan()
