@@ -19,7 +19,7 @@ class LoanApplication(models.Model):
     # TODO (3.06): mix the chatter into this model by adding _inherit alongside the
     # two lines above — keep _name, do not replace it:
     #
-    #     _inherit = ["mail.thread", "mail.activity.mixin"]
+    _inherit = ["mail.thread", "mail.activity.mixin"]
     #
     # mail.thread brings the message history and followers; mail.activity.mixin
     # brings scheduled activities. Both are AbstractModels: they have no table of
@@ -79,6 +79,7 @@ class LoanApplication(models.Model):
         ],
         default="draft",
         copy=False,
+        tracking=True
     )
 
     active = fields.Boolean(default=True)
@@ -114,7 +115,7 @@ class LoanApplication(models.Model):
     # not something anyone can be asked to fill in, and a required column with
     # nothing writing to it only produces NOT NULL errors.
     principal_amount = fields.Monetary(
-        string="Principal Amount", required=True, currency_field="currency_id"
+        string="Principal Amount", required=True, currency_field="currency_id",tracking=True
     )
 
     # TODO (3.01): loan_amount stops being a figure anyone types in.
@@ -308,6 +309,10 @@ class LoanApplication(models.Model):
                     "date_approved": fields.Date.context_today(loan),
                 }
                     )
+            loan.message_post(
+                body=self.env._("Application successfully submitted for review!"),
+                subtype_xmlid="mail.mt_note",
+            )
         # TODO (3.03): the guard first, the state change second.
         #
         # Ask each line whether it counts, instead of reaching into the document type
@@ -329,10 +334,10 @@ class LoanApplication(models.Model):
         # TODO (3.06): once the chatter is in place, post a note here, straight after
         # the state changes:
         #
-        #     loan.message_post(
-        #         body=self.env._("Application successfully submitted for review!"),
-        #         subtype_xmlid="mail.mt_note",
-        #     )
+            loan.message_post(
+                body=self.env._("Application successfully submitted for review!"),
+                subtype_xmlid="mail.mt_note",
+            )
         #
         # On loan, not on self: message_post writes to one record. mail.mt_note is
         # the internal-note subtype, so it lands in the history without emailing the
